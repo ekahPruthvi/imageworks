@@ -25,19 +25,17 @@ fn main() -> Result<(), io::Error> {
 
     loop {
         terminal.draw(|f| {
-            // Divide screen into a Left (Menu) and Right (Preview) section
             let chunks = Layout::default()
                 .direction(Direction::Horizontal)
                 .constraints([Constraint::Percentage(30), Constraint::Percentage(70)])
                 .split(f.size());
 
-            // 1. Create the Menu List
             let items: Vec<ListItem> = menu_items
                 .iter()
                 .enumerate()
                 .map(|(i, item)| {
                     if i == selected_index {
-                        ListItem::new(format!(">> {}", item)) // Highlight selection
+                        ListItem::new(format!(">> {}", item)) 
                     } else {
                         ListItem::new(format!("   {}", item))
                     }
@@ -49,7 +47,6 @@ fn main() -> Result<(), io::Error> {
             
             f.render_widget(menu, chunks[0]);
 
-            // 2. Create the Preview Area
             let preview = Paragraph::new("Image Preview will appear here...")
                 .block(Block::default().title(" Preview ").borders(Borders::ALL));
             
@@ -66,8 +63,7 @@ fn main() -> Result<(), io::Error> {
                     if selected_index < menu_items.len() - 1 { selected_index += 1; }
                 }
                 KeyCode::Enter => {
-                    if selected_index == 4 { break; } // Quit
-                    // Add logic here for other menu items!
+                    if selected_index == 4 { break; } 
                 }
                 _ => {}
             }
