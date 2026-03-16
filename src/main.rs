@@ -3,9 +3,9 @@ pub mod frame;
 use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout,Rect},
-    widgets::{Block, Borders, List, ListItem, Paragraph},
+    widgets::{Block, Borders, List, ListItem, Paragraph, Cell, Row, Table},
     Terminal,
-    style::{Color, Style}
+    style::{Color, Style, Modifier}
 };
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -61,7 +61,7 @@ fn main() -> Result<(), io::Error> {
                 .enumerate()
                 .map(|(i, item)| {
                     if i == selected_index {
-                        ListItem::new(format!(" ⯌ {}", item)) 
+                        ListItem::new(format!(" ⯌ {}", item)).style(Style::default().add_modifier(Modifier::BOLD)) 
                     } else {
                         ListItem::new(format!("   {}", item))
                     }
@@ -79,24 +79,41 @@ fn main() -> Result<(), io::Error> {
             f.render_widget(preview, chunks[1]);
 
             if show_qu {
-                let area = help(60, 20, f.area()); // 60% wide, 20% tall
-                
-                // Clear the background so the image doesn't bleed through the menu
+                let area = help(60, 20, f.area());  
                 f.render_widget(ratatui::widgets::Clear, area); 
 
-                let help_text = " 󰌌  CONTROLS \n\n \
-                                [+] Increase Menu  [-] Decrease Menu \n \
-                                [Up/Down] Navigate [Enter] Select \n \
-                                [?] Close Help     [q] Quit";
+                let rows = vec![
+                    Row::new(vec![" + / - ", " Increase / Decrease Menu width "]).style(Style::default().bg(Color::Rgb(30, 30, 30))),
+                    Row::new(vec![" h / ? ", " This help menu toggle "]),
+                    Row::new(vec![" o ", " Open new image using path "]).style(Style::default().bg(Color::Rgb(30, 30, 30))), 
+                    Row::new(vec![" ↑ / ↓ ", " Navigate Menu "]),
+                    Row::new(vec![" Return ", " Select Menu option "]).style(Style::default().bg(Color::Rgb(30, 30, 30))),
+                    Row::new(vec![" → / ← ", " Navigate images from the working folder "]),
+                    Row::new(vec![" s ", " Save image as edited "]).style(Style::default().bg(Color::Rgb(30, 30, 30))),
+                    Row::new(vec![" q ", " Quit ImageWorks "]),
+                    Row::new(vec![" PageUp ", " Credits to me ( - The Dev) "]).style(Style::default().bg(Color::Rgb(30, 30, 30)))
+                ];
 
-                let help_menu = Paragraph::new(help_text)
+                let tablele = Table::new(rows, 
+                        [
+                            Constraint::Min(5),
+                            Constraint::Min(20)
+                        ]
+                    )
+                    .header(
+                        Row::new(vec![" Key ", " Action "])
+                            .style(Style::default().add_modifier(Modifier::ITALIC).add_modifier(Modifier::BOLD))
+                            .bottom_margin(1)
+                            .top_margin(1)
+                    )
                     .block(Block::default()
-                        .title(" Quick Help ")
-                        .borders(Borders::ALL)
-                        .border_style(Style::default().fg(Color::Yellow)))
-                    .alignment(ratatui::layout::Alignment::Center);
+                        .title(" Welp? ")
+                        .borders(Borders::all())
+                        .border_style(Style::default().fg(Color::Green))
+                    )
+                    .column_spacing(1);
 
-                f.render_widget(help_menu, area);
+                f.render_widget(tablele, area);
             }
 
         })?;
