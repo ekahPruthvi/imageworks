@@ -1,0 +1,22 @@
+  362  git add . && git commit -m "fixing template" && git push
+  363  pkill vesktop
+  364  pnpm tauri dev
+  365  cargo clean
+  366  cd src
+  367  cargo clean
+  368  cd ../src-tauri
+  369  cargo clean
+  370  pkill capsule
+  371  capsule
+  372  up
+  373  diff <(echo 0.0.1) <(echo 0.1.2)
+  374  diff <(echo 0.0.1) <(echo 0.1.0)
+  375  diff <(echo 0.1.1) <(echo 0.1.0)
+  376  mpv --no-video --volume=100 $HOME/.config/niri/sound/startup/default.mp3
+  377  "mpv --no-video --volume=100 /var/cynager/niri/sound/startup/default.mp3"
+  378  mpv --no-video --volume=100 /var/lib/cynager/niri/sound/startup/default.mp3
+  379  ani-cli doremon
+  380  ani-cli mash
+  381  Documents
+  382  cargo new imageworks
+  383  code imageworks
