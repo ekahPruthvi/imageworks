@@ -2,9 +2,10 @@ pub mod frame;
 
 use ratatui::{
     backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout},
+    layout::{Constraint, Direction, Layout,Rect},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Terminal,
+    style::{Color, Style}
 };
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -12,6 +13,26 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io;
+
+fn help(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage((100 - percent_y) / 2),
+            Constraint::Percentage(percent_y),
+            Constraint::Percentage((100 - percent_y) / 2),
+        ])
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage((100 - percent_x) / 2),
+            Constraint::Percentage(percent_x),
+            Constraint::Percentage((100 - percent_x) / 2),
+        ])
+        .split(popup_layout[1])[1]
+}
 
 fn main() -> Result<(), io::Error> {
     enable_raw_mode()?;
@@ -23,6 +44,7 @@ fn main() -> Result<(), io::Error> {
     let menu_items = vec!["", "Grayscale", "Compress"];
     let mut selected_index = 1;
     let mut frame_width_percent: u16 = 10;
+    let mut show_qu :bool = false;
 
     loop {
         terminal.draw(|f| {
@@ -56,6 +78,27 @@ fn main() -> Result<(), io::Error> {
             
             f.render_widget(preview, chunks[1]);
 
+            if show_qu {
+                let area = help(60, 20, f.area()); // 60% wide, 20% tall
+                
+                // Clear the background so the image doesn't bleed through the menu
+                f.render_widget(ratatui::widgets::Clear, area); 
+
+                let help_text = " 󰌌  CONTROLS \n\n \
+                                [+] Increase Menu  [-] Decrease Menu \n \
+                                [Up/Down] Navigate [Enter] Select \n \
+                                [?] Close Help     [q] Quit";
+
+                let help_menu = Paragraph::new(help_text)
+                    .block(Block::default()
+                        .title(" Quick Help ")
+                        .borders(Borders::ALL)
+                        .border_style(Style::default().fg(Color::Yellow)))
+                    .alignment(ratatui::layout::Alignment::Center);
+
+                f.render_widget(help_menu, area);
+            }
+
         })?;
 
         if let Event::Key(key) = event::read()? {
@@ -79,6 +122,11 @@ fn main() -> Result<(), io::Error> {
                     if frame_width_percent > 10 {
                         frame_width_percent -= 5;
                     }
+                }
+                KeyCode::Char('?') | KeyCode::Char('h') => {
+                    if !show_qu {
+                        show_qu = true;
+                    } else { show_qu = false; }
                 }
                 _ => {}
             }
