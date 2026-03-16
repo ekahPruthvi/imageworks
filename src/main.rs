@@ -73,7 +73,7 @@ fn main() -> Result<(), io::Error> {
             
             f.render_widget(menu, chunks[0]);
 
-            let preview = Paragraph::new("\n Image Preview will appear here...")
+            let preview = Paragraph::new("\n ░▀▀▀░░░\n ▒▒▒▒▒▒▒ empty working directory \n ▒▒▒▒▒▒▒")
                 .block(Block::default().title(" Preview ").borders(Borders::ALL));
             
             f.render_widget(preview, chunks[1]);
@@ -115,6 +115,7 @@ fn main() -> Result<(), io::Error> {
 
                 f.render_widget(tablele, area);
             }
+            
 
         })?;
 
