@@ -14,6 +14,8 @@ use crossterm::{
 };
 use std::io;
 
+use crate::frame::image_to_matrix;
+
 fn help(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -124,7 +126,7 @@ fn main() -> Result<(), io::Error> {
                 f.render_widget(ratatui::widgets::Clear, area);
 
                 let inputdisp = Paragraph::new(inputpp.as_str())
-                .block(Block::default().title(" Start Typing - [Enter] to select - [Esc] to 'esacpe' ").borders(Borders::ALL).style(Style::default().bg(Color::LightYellow).fg(Color::Black)));
+                .block(Block::default().title(" Start Typing - [Enter] to select - [Esc] to 'esacpe' ").borders(Borders::ALL).style(Style::default().bg(Color::LightYellow).fg(Color::Black).add_modifier(Modifier::BOLD)));
 
                 f.render_widget(inputdisp, area);
             }
@@ -176,7 +178,8 @@ fn main() -> Result<(), io::Error> {
                     inputpp.pop();
                 }
                 KeyCode::Enter => {
-
+                    let matrix = image_to_matrix(inputpp.to_string());
+                    open_qu = false;
                 }
                 _ => {}
             }

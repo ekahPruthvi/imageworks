@@ -72,7 +72,7 @@ pub fn get_auto_downsample_factor(image_width: usize) -> usize {
     1
 }
 
-pub fn display_color_terminal(matrix: &Matrix) {
+pub fn matrix_in_terminal(matrix: &Matrix) -> Matrix {
     let factor = get_auto_downsample_factor(if !matrix.is_empty() { matrix[0].len()} else { 0 });
 
     let old_height = matrix.len();
@@ -107,10 +107,6 @@ pub fn display_color_terminal(matrix: &Matrix) {
         }
     }
 
-    for row in new_matrix {
-        for pixel in row {
-            print!("\x1b[48;2;{};{};{}m  ", pixel.r, pixel.g, pixel.b);
-        }
-        println!("\x1b[0m");
-    }
+    new_matrix
+
 }
