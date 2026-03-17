@@ -119,15 +119,12 @@ fn main() -> Result<(), io::Error> {
             }
 
             if open_qu {
-                let area = help(60, 10, f.area());
+                let area = help(90, 10, f.area());
 
-                // let inpbox = Layout::default()
-                //     .direction(Direction::Horizontal)
-                //     .constraints([Constraint::Fill(1)])
-                //     .split(f.area());
+                f.render_widget(ratatui::widgets::Clear, area);
 
-                let inputdisp = Paragraph::new("\n ░▀▀▀░░░\n ▒▒▒▒▒▒▒ empty working directory \n ▒▒▒▒▒▒▒")
-                .block(Block::default().title(" Preview ").borders(Borders::ALL ^ Borders::BOTTOM));
+                let inputdisp = Paragraph::new(inputpp.as_str())
+                .block(Block::default().title(" Start Typing - [Enter] to select - [Esc] to 'esacpe' ").borders(Borders::ALL).style(Style::default().bg(Color::LightYellow).fg(Color::Black)));
 
                 f.render_widget(inputdisp, area);
             }
@@ -170,6 +167,7 @@ fn main() -> Result<(), io::Error> {
             match key.code {
                 KeyCode::Esc => {
                     open_qu = false;
+                    inputpp.clear();
                 }
                 KeyCode::Char(c) => {
                     inputpp.push(c);
