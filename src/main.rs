@@ -3,7 +3,7 @@ pub mod frame;
 use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout,Rect},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Cell, Row, Table},
+    widgets::{Block, Borders, List, ListItem, Paragraph, Row, Table},
     Terminal,
     style::{Color, Style, Modifier}
 };
@@ -45,6 +45,8 @@ fn main() -> Result<(), io::Error> {
     let mut selected_index = 1;
     let mut frame_width_percent: u16 = 10;
     let mut show_qu :bool = false;
+    let mut open_qu :bool = false;
+    let mut inputpp :String = "".to_string();
 
     loop {
         terminal.draw(|f| {
@@ -80,7 +82,7 @@ fn main() -> Result<(), io::Error> {
 
             if show_qu {
                 let area = help(60, 20, f.area());  
-                f.render_widget(ratatui::widgets::Clear, area); 
+                // f.render_widget(ratatui::widgets::Clear, area); 
 
                 let rows = vec![
                     Row::new(vec![" + / - ", " Increase / Decrease Menu width "]).style(Style::default().bg(Color::Rgb(30, 30, 30))),
@@ -115,11 +117,25 @@ fn main() -> Result<(), io::Error> {
 
                 f.render_widget(tablele, area);
             }
+
+            if open_qu {
+                let area = help(60, 10, f.area());
+
+                // let inpbox = Layout::default()
+                //     .direction(Direction::Horizontal)
+                //     .constraints([Constraint::Fill(1)])
+                //     .split(f.area());
+
+                let inputdisp = Paragraph::new("\n ░▀▀▀░░░\n ▒▒▒▒▒▒▒ empty working directory \n ▒▒▒▒▒▒▒")
+                .block(Block::default().title(" Preview ").borders(Borders::ALL ^ Borders::BOTTOM));
+
+                f.render_widget(inputdisp, area);
+            }
             
 
         })?;
 
-        if let Event::Key(key) = event::read()? {
+        if !open_qu && let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => break,
                 KeyCode::Up => {
@@ -142,9 +158,27 @@ fn main() -> Result<(), io::Error> {
                     }
                 }
                 KeyCode::Char('?') | KeyCode::Char('h') => {
-                    if !show_qu {
-                        show_qu = true;
-                    } else { show_qu = false; }
+                    show_qu = if !show_qu { true } else { false };
+                }
+                KeyCode::Char('o') => {
+                    open_qu = if !open_qu { true } else { false };
+                }
+
+                _ => {}
+            }
+        } else if let Event::Key(key) = event::read()? {
+            match key.code {
+                KeyCode::Esc => {
+                    open_qu = false;
+                }
+                KeyCode::Char(c) => {
+                    inputpp.push(c);
+                }
+                KeyCode::Backspace => {
+                    inputpp.pop();
+                }
+                KeyCode::Enter => {
+
                 }
                 _ => {}
             }
