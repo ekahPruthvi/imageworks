@@ -1,6 +1,9 @@
 use image::{GenericImageView, RgbImage, Rgb as ImageRgb, Pixel};
-use std::path::Path;
+use std::path::{ Path, PathBuf };
 use terminal_size::{Width, Height, terminal_size};
+use std::fs::{self, File };
+use std::io::{self, Read, Write};
+use dirs::picture_dir;
 
 #[derive(Copy, Clone)]
 pub struct Rgb {
@@ -32,12 +35,12 @@ pub fn image_to_matrix<P: AsRef<Path>>(path: P) -> Result<Matrix, image::ImageEr
     Ok(matrix)
 }
 
-pub fn image_compresso(matrix: &mut Matrix) {
-    let x = matrix.len() as u32;
-    let y = if x > 0 { matrix[0].len() as u32 } else { 0 };
+// pub fn image_compresso(matrix: &mut Matrix) {
+//     let x = matrix.len() as u32;
+//     let y = if x > 0 { matrix[0].len() as u32 } else { 0 };
 
-    println!("Compressing image using ")   
-}
+//     println!("Compressing image using ")   
+// }
 
 pub fn matrix_to_image<P: AsRef<Path>>(matrix: &Matrix, path: P) -> Result<(), image::ImageError> {
     let y = matrix.len() as u32;
@@ -68,11 +71,11 @@ pub fn get_auto_downsample_factor(image_width: usize) -> usize {
             return (image_width / available_space).max(1);
         }
     }
-    
+
     1
 }
 
-pub fn matrix_in_terminal(matrix: &Matrix) -> Matrix {
+pub fn matrix_to_terminal_show_thingy(matrix: &Matrix) -> Matrix {
     let factor = get_auto_downsample_factor(if !matrix.is_empty() { matrix[0].len()} else { 0 });
 
     let old_height = matrix.len();
@@ -110,3 +113,7 @@ pub fn matrix_in_terminal(matrix: &Matrix) -> Matrix {
     new_matrix
 
 }
+
+// pub fn display_gallery() -> Matrix {
+//     let Pictures_path = ;
+// }
