@@ -3,6 +3,8 @@ pub mod frame;
 use std::env;
 use std::process;
 
+use crate::frame::image_compresso;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -17,6 +19,8 @@ fn main() {
     match flag.as_str() {
         "-c" => {
             println!("Compressing the image to `probe` at {}", path);
+            let mut matrix = frame::image_to_matrix(path).expect("error converting to matrix");
+            image_compresso(&mut matrix);
         }
         "-r" => {
             println!("Reading `probe` file");
