@@ -1,5 +1,7 @@
 use image::{GenericImageView, RgbImage, Rgb as ImageRgb, Pixel};
-use std::path::{ Path };
+use std::path::{ Path, PathBuf };
+use std::fs::File;
+use std::io::{ self, Write, BufWriter };
 
 #[derive(Copy, Clone)]
 pub struct Rgb {
@@ -8,18 +10,17 @@ pub struct Rgb {
     b: u8,
 }
 
-struct MathShape {
-    x: u32,
-    y: u32,
-    width: u32,
-    height: u32,
+struct LineForm {
+    x1: u32,
+    y1: u32,
+    x2: u32,
+    m: u32,
     base_color: Rgb,
-    gradient: (i32, i32, i32),
 }
 
 type Matrix = Vec<Vec<Rgb>>;
 
-pub fn image_to_matrix<P: AsRef<Path>>(path: P) -> Result<Matrix, image::ImageError> {
+fn image_to_matrix<P: AsRef<Path>>(path: P) -> Result<Matrix, image::ImageError> {
     let img = image::open(path)?;
     let (width, height) = img.dimensions();
 
@@ -40,73 +41,80 @@ pub fn image_to_matrix<P: AsRef<Path>>(path: P) -> Result<Matrix, image::ImageEr
     Ok(matrix)
 }
 
-pub fn image_compresso(matrix: &mut Matrix) {
+pub fn image_compresso<P: AsRef<Path>>(path: P) -> io::Result<()> {
+    let matrix = image_to_matrix(&path).expect("error converting image to matrix");
     let x = matrix.len();
     let y = if x > 0 { matrix[0].len()} else { 0 };
     
     println!("Compressing image using pattern based clustering and reduction");
     
     let mut visited = vec![vec![false; y]; x];
-    let mut shapes: Vec<MathShape> = Vec::new();
+    let mut if_line: Vec<LineForm> = Vec::new();
 
-    for r in 0..x {
-        for c in 0..y {
-            if visited[r][c] { continue; }
+    // for r in 0..x {
+    //     for c in 0..y {
+    //         if visited[r][c] { continue; }
 
-            let start_pixel = matrix[r][c];
-            let mut width = 1;
+    //         let start_pixel = matrix[r][c];
+    //         let mut width = 1;
             
-            if c + 1 < y {
-                let next_pixel = matrix[r][c + 1];
-                let dr = next_pixel.r as i32 - start_pixel.r as i32;
-                let dg = next_pixel.g as i32 - start_pixel.g as i32;
-                let db = next_pixel.b as i32 - start_pixel.b as i32;
+    //         if c + 1 < y {
+    //             let next_pixel = matrix[r][c + 1];
+    //             let dr = next_pixel.r as i32 - start_pixel.r as i32;
+    //             let dg = next_pixel.g as i32 - start_pixel.g as i32;
+    //             let db = next_pixel.b as i32 - start_pixel.b as i32;
 
-                while c + width < y && !visited[r][c + width] {
-                    let curr = matrix[r][c + width];
-                    let prev = matrix[r][c + width - 1];
+    //             while c + width < y && !visited[r][c + width] {
+    //                 let curr = matrix[r][c + width];
+    //                 let prev = matrix[r][c + width - 1];
                     
-                    if (curr.r as i32 - prev.r as i32) == dr &&
-                       (curr.g as i32 - prev.g as i32) == dg &&
-                       (curr.b as i32 - prev.b as i32) == db {
-                        width += 1;
-                    } else {
-                        break;
-                    }
-                }
+    //                 if (curr.r as i32 - prev.r as i32) == dr &&
+    //                    (curr.g as i32 - prev.g as i32) == dg &&
+    //                    (curr.b as i32 - prev.b as i32) == db {
+    //                     width += 1;
+    //                 } else {
+    //                     break;
+    //                 }
+    //             }
 
-                for i in 0..width { visited[r][c + i] = true; }
+    //             for i in 0..width { visited[r][c + i] = true; }
                 
-                shapes.push(MathShape {
-                    x: c as u32,
-                    y: r as u32,
-                    width: width as u32,
-                    height: 1,
-                    base_color: start_pixel,
-                    gradient: (dr, dg, db),
-                });
+    //             shapes.push(MathShape {
+    //                 x: c as u32,
+    //                 y: r as u32,
+    //                 width: width as u32,
+    //                 height: 1,
+    //                 base_color: start_pixel,
+    //                 gradient: (dr, dg, db),
+    //             });
 
-                println!("Found somthing at, {} {}", c, r)
-            }
-        }
-    }
+    //             println!("Found somthing at, {} {}", c, r)
+    //         }
+    //     }
+    // }
 
+    write_matrix_binary(matrix, &path)
 }
 
-pub fn matrix_to_image<P: AsRef<Path>>(matrix: &Matrix, path: P) -> Result<(), image::ImageError> {
-    let y = matrix.len() as u32;
-    let x = if y > 0 { matrix[0].len() as u32 } else { 0 };
+fn write_matrix_binary<P: AsRef<Path>>(matrix: Matrix, path: P) -> io::Result<()> {
+    let out_path: PathBuf = path.as_ref().with_extension("cnan");
 
-    let mut imgbuf = RgbImage::new(x, y);
+    let height = matrix.len() as u32;
+    let width = if height > 0 { matrix[0].len() as u32 } else { 0 };
 
-    for (yy, row) in matrix.iter().enumerate() {
-        for (xx, pixel) in row.iter().enumerate() {
-            let image_pixel = ImageRgb([pixel.r, pixel.g, pixel.b]);
-            imgbuf.put_pixel(xx as u32, yy as u32, image_pixel);
+    let file = File::create(&out_path)?;
+    let mut writer = BufWriter::with_capacity(8 + (width as usize * height as usize * 3), file);
+
+    writer.write_all(&width.to_le_bytes())?;
+    writer.write_all(&height.to_le_bytes())?;
+
+    for row in matrix.iter() {
+        for px in row.iter() {
+            writer.write_all(&[px.r, px.g, px.b])?;
         }
     }
 
-    imgbuf.save(path)?;
-
+    writer.flush()?;
+    println!("Wrote compressed matrix to {}", out_path.display());
     Ok(())
 }

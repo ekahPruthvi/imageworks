@@ -18,12 +18,11 @@ fn main() {
 
     match flag.as_str() {
         "-c" => {
-            println!("Compressing the image to `probe` at {}", path);
-            let mut matrix = frame::image_to_matrix(path).expect("error converting to matrix");
-            image_compresso(&mut matrix);
+            println!("Compressing the image to `canon` at {}", path);
+            image_compresso(path);
         }
         "-r" => {
-            println!("Reading `probe` file");
+            println!("Reading `.cnan` file");
         }
         _ => {
             eprintln!("Error: Unknown flag '{}'", flag);
@@ -36,6 +35,6 @@ fn main() {
 fn print_usage() {
     println!("Usage: imgrk [FLAG] [PATH]");
     println!("\nFlags:");
-    println!("  -c    Compress the image to `probe` format");
-    println!("  -r    Read a `probe` file");
+    println!("  -c    Compress the image to `canon` format");
+    println!("  -r    Read a `canon` file");
 }
